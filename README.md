@@ -2,7 +2,7 @@
 
 Personal Drive is a file storage app I built with Spring Boot. It has a browser interface for organizing files and folders, sharing items with other accounts, and managing file history and storage space.
 
-The project is split into three services: one handles the app and its data, one stores file contents, and one helps the services find each other. The web interface is served by Drive-Service, so there is no separate frontend server to start.
+The application uses a microservices architecture built with Spring Boot. Its three independently runnable services separate the Drive application and metadata, file-content storage, and service discovery. Drive-Service communicates with Storage_Service for file operations, while Drive-Service and Storage_Service register with ServiceRegistry through Eureka. The web interface is served by Drive-Service, so there is no separate frontend server to start.
 
 ## What it can do
 
@@ -15,7 +15,7 @@ The project is split into three services: one handles the app and its data, one 
 - Keep file versions and restore an earlier version
 - See storage usage and enforce a per-account quota
 
-## How the services fit together
+## Microservices architecture
 
 ```mermaid
 flowchart LR
