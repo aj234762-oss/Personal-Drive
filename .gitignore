@@ -1,0 +1,23 @@
+# Maven build output
+**/target/
+
+# Local application data (H2 databases, uploaded files, and generated keys)
+**/data/
+
+# IDE and editor settings
+.idea/
+**/.idea/
+.vscode/
+*.iml
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs and operating system files
+*.log
+.DS_Store
+Thumbs.db

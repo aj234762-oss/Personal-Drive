@@ -1,0 +1,63 @@
+services:
+  registry:
+    image: arjunsingh63/drive-registry:1.0
+    build:
+      context: ./ServiceRegistry
+    ports:
+      - "8762:8762"
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: registry
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry:8762/eureka/
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8762/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 20
+
+  storage:
+    image: arjunsingh63/drive-storage:1.0
+    build:
+      context: ./Storage_Service
+    depends_on:
+      registry:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry:8762/eureka/
+      DRIVE_STORAGE_JWT_SECRET: ${DRIVE_STORAGE_JWT_SECRET:?Set DRIVE_STORAGE_JWT_SECRET in your .env file}
+      DRIVE_STORAGE_DIR: /app/data/objects
+    ports:
+      - "8092:8092"
+    volumes:
+      - storage_data:/app/data/objects
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8092/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 20
+
+  drive:
+    image: arjunsingh63/personal-drive:1.0
+    build:
+      context: ./Drive-Service
+    depends_on:
+      registry:
+        condition: service_healthy
+      storage:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry:8762/eureka/
+      DRIVE_STORAGE_JWT_SECRET: ${DRIVE_STORAGE_JWT_SECRET:?Set DRIVE_STORAGE_JWT_SECRET in your .env file}
+      DRIVE_STORAGE_QUOTA_BYTES: ${DRIVE_STORAGE_QUOTA_BYTES:-5368709120}
+    ports:
+      - "8091:8091"
+    volumes:
+      - drive_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  drive_data:
+  storage_data:
